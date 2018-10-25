@@ -5,6 +5,12 @@ import Authentication
 
 final class User {
 
+    struct Public: Codable, Content {
+
+        let id: String
+        let uuid: String
+    }
+
     var password: String
     var id: UUID?
     var uuid: String
@@ -13,6 +19,10 @@ final class User {
         self.id = id
         self.uuid = uuid
         self.password = try BCrypt.hash(password)
+    }
+
+    func publicUser() -> Public {
+        return Public(id: id!.uuidString, uuid: uuid)
     }
 }
 
@@ -37,6 +47,15 @@ extension User: Migration {
         return Database.create(self, on: conn, closure: { (builder) in
             try addProperties(to: builder)
             builder.unique(on: \.id)
+        })
+    }
+}
+
+
+extension Future where T: User {
+    func publicUser() -> Future<User.Public> {
+        return self.map(to: User.Public.self, { (user) in
+            return user.publicUser()
         })
     }
 }

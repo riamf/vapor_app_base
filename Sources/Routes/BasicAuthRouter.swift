@@ -11,8 +11,10 @@ class BasicAuthRouter: RouteCollection {
         let protected = router.grouped(basicAuthMiddleware,
                                        guardAuthMiddleware)
 
-        protected.get("users") { (request) -> Future<[User]> in
-            return User.query(on: request).all()
+        protected.get("users") { (request) -> Future<[User.Public]> in
+            return User.query(on: request).all().map({ (users) in
+                return users.map({$0.publicUser()})
+            })
         }
     }
 }
