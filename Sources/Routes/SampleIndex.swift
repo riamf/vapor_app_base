@@ -8,8 +8,6 @@ class SampleIndex: RouteCollection {
     }
 
     func indexHandler(request: Request) throws -> Future<View> {
-        return try User(password: "root").save(on: request).flatMap({ (_) -> EventLoopFuture<View> in
-            return try request.view().render("index")
-        })
+        return try request.view().render("index")
     }
 }
