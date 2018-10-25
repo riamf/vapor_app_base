@@ -1,12 +1,11 @@
-import MySQL
-import Fluent
+import FluentMySQL
 import Vapor
 import Leaf
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
-    try services.register(MySQLProvider())
+    try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
 
     /// Register routes to the router
@@ -20,11 +19,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
 
-    // Configure a SQLite database
     let hostname = Environment.get("MYSQL_HOST") ?? "localhost"
     let portString = Environment.get("MYSQL_PORT") ?? "3306"
     let username = Environment.get("MYSQL_USERNAME") ?? "root"
-    let password = Environment.get("MYSQL_PASSWORD") ?? ""
+    let password = Environment.get("MYSQL_PASSWORD") ?? "root"
     let schema = Environment.get("MYSQL_DATABASE") ?? "db_name"
     let mysqlConfig = MySQLDatabaseConfig(hostname: hostname,
                                           port: Int(portString)!,
@@ -42,6 +40,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     /// Configure migrations
     var migrations = MigrationConfig()
+    migrations.add(model: User.self, database: .mysql)
     services.register(migrations)
 
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
