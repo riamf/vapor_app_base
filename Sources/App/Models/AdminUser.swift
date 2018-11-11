@@ -1,7 +1,5 @@
 import Vapor
-import Foundation
 import FluentMySQL
-import Crypto
 
 struct AdminUser: Migration {
 
@@ -9,9 +7,10 @@ struct AdminUser: Migration {
 
     static func prepare(on conn: MySQLConnection) -> EventLoopFuture<Void> {
         guard let password = Environment.get("MULTIPASS"),
-            let user = try? User(uuid: UUID().uuidString,
-                                 password: password) else {
-            fatalError("UNABLE TO HASH PASSWORD 😱")
+            let uuid = Environment.get("MULTIPASS_UUID"),
+            let user = try? User(uuid: uuid,
+                                 password:  password) else {
+            fatalError("UNABLE TO ADD ADMIN USER 😱")
         }
 
         return user.save(on: conn).transform(to: ())

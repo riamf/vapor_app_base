@@ -11,26 +11,24 @@ final class User {
         let uuid: String
     }
 
+    var id: Int?
     var password: String
-    var id: UUID?
     var uuid: String
 
-    init(id: UUID? = nil, uuid: String, password: String) throws {
+    init(id: Int? = nil, uuid: String, password: String) throws {
         self.id = id
         self.uuid = uuid
         self.password = try BCrypt.hash(password)
     }
 
     func publicUser() -> Public {
-        return Public(id: id!.uuidString, uuid: uuid)
+        return Public(id: "\(id!)", uuid: uuid)
     }
 }
 
-extension User: MySQLUUIDModel {}
-extension User: Codable {}
-extension User: Model {}
-extension User: Content {}
+extension User: MySQLModel {}
 extension User: Parameter {}
+extension User: Content {}
 
 extension User: BasicAuthenticatable {
     static var usernameKey: UsernameKey {
@@ -47,15 +45,6 @@ extension User: Migration {
         return Database.create(self, on: conn, closure: { (builder) in
             try addProperties(to: builder)
             builder.unique(on: \.id)
-        })
-    }
-}
-
-
-extension Future where T: User {
-    func publicUser() -> Future<User.Public> {
-        return self.map(to: User.Public.self, { (user) in
-            return user.publicUser()
         })
     }
 }

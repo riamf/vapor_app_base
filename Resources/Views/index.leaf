@@ -5,6 +5,10 @@
 <title>Welcome vapor template</title>
 </head>
 <body>
-<h1>Welcome</h1>
+    #if(name) {
+        <h1>Welcome #(name)</h1>
+    } else {
+        <h1>Welcome</h1>
+    }
 </body>
 </html>
